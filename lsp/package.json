@@ -1,0 +1,13 @@
+{
+  "name": "lsp",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/cors": "^8.4.1",
+    "@fastify/websocket": "^8.2.0",
+    "fastify": "^4.24.3",
+    "vscode-languageserver": "^8.0.2",
+    "vscode-ws-jsonrpc": "^2.0.0",
+    "ws": "^8.10.0"
+  }
+}

@@ -15,12 +15,14 @@ function createServerProcess(serverName, command, args, options, traceId) {
   );
   if (serverProcess.stderr !== null) {
     serverProcess.stderr.on("data", (data) => {
-      console.error({
-        lspLog: data.toString(),
-        "logging.googleapis.com/trace": traceId
-          ? `projects/wasm-c-web/traces/${traceId}`
-          : undefined,
-      });
+      console.log(
+        JSON.stringify({
+          lspLog: data.toString(),
+          "logging.googleapis.com/trace": traceId
+            ? `projects/wasm-c-web/traces/${traceId}`
+            : undefined,
+        })
+      );
     });
   }
   return server.createProcessStreamConnection(serverProcess);

@@ -12,3 +12,7 @@ popd
 pushd lsp
 bash push.sh
 popd
+
+pushd metrics
+bash push.sh
+popd

@@ -29,3 +29,6 @@ gcloud run services add-iam-policy-binding compiler \
 gcloud run services add-iam-policy-binding lsp \
   --member="allUsers" \
   --role="roles/run.invoker"
+gcloud run services add-iam-policy-binding metrics \
+  --member="allUsers" \
+  --role="roles/run.invoker"

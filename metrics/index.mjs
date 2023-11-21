@@ -1,11 +1,6 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
-import path from "node:path";
-import fs from "node:fs/promises";
-import os from "node:os";
 import url from "node:url";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception: ", err.toString());
@@ -13,52 +8,6 @@ process.on("uncaughtException", (err) => {
     console.error(err.stack);
   }
 });
-
-const WASI_SDK_PATH = process.env.WASI_SDK_PATH;
-const pExec = promisify(exec);
-const tmpDir = os.tmpdir();
-
-const CODE = {
-  OK: 0,
-  ERROR: 10,
-  UNKNOWN: 90,
-};
-
-const compileToWasm = async (src) => {
-  const id = crypto.randomUUID();
-  const tmp = path.join(tmpDir, id);
-  // const tmp = tmpDir;
-  await fs.mkdir(tmp);
-
-  const rawFileName = `main.c`;
-  const wasmFileName = `main.wasm`;
-  const asyncWasmFileName = `main.async.wasm`;
-
-  const rawFilePath = path.resolve(path.join(tmp, rawFileName));
-  const wasmFilePath = path.resolve(path.join(tmp, wasmFileName));
-  const asyncWasmFilePath = path.resolve(path.join(tmp, asyncWasmFileName));
-
-  await fs.writeFile(rawFilePath, src);
-
-  const compileLog = await pExec(
-    [
-      `/${WASI_SDK_PATH}/bin/clang`,
-      `-I ${WASI_SDK_PATH}/lib/clang/11.0.0/include`,
-      `--sysroot=${WASI_SDK_PATH}/share/wasi-sysroot`,
-
-      // The file size is generally 1.3 to almost 2 times larger.
-      "-Wl,--export-all",
-      rawFilePath,
-      `-o`,
-      wasmFilePath,
-      "-v",
-    ].join(" ")
-  );
-
-  await pExec(`wasm-opt --asyncify ${wasmFilePath} -o ${asyncWasmFilePath}`);
-
-  return { compileLog, binary: fs.readFile(asyncWasmFilePath) };
-};
 
 const build = async () => {
   const server = fastify({
@@ -97,24 +46,7 @@ const build = async () => {
   });
 
   server.post("/", async (request, reply) => {
-    const { src } = request.body;
-    try {
-      const { compileLog, binary } = await compileToWasm(src);
-      // request.log.info({ src, binarySize: binary.length });
-      reply.send({
-        code: CODE.OK,
-        binary,
-        compileLog,
-      });
-    } catch (error) {
-      request.log.error(error);
-      const message = error.stderr;
-
-      reply.send({
-        code: CODE.ERROR,
-        message,
-      });
-    }
+    reply.send("OK");
   });
 
   return server;

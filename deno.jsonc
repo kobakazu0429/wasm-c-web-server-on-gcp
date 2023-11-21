@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "deploy": "gcloud artifacts docker images list --include-tags asia-northeast1-docker.pkg.dev/wasm-c-web/gcr --format=json --filter='tags:latest' | deno run -A deploy.ts",
+    "deploy:yes": "deno task deploy --yes"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["ban-ts-comment"]
+    }
+  }
+}

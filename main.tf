@@ -15,7 +15,7 @@ resource "google_cloud_run_v2_service" "compiler" {
     timeout                          = "300s"
 
     containers {
-      image = "asia-northeast1-docker.pkg.dev/wasm-c-web/gcr/compiler:latest"
+      image = var.compiler_image_url
 
       resources {
         cpu_idle = true
@@ -61,7 +61,7 @@ resource "google_cloud_run_v2_service" "lsp" {
     timeout                          = "300s"
 
     containers {
-      image = "asia-northeast1-docker.pkg.dev/wasm-c-web/gcr/lsp:latest"
+      image = var.lsp_image_url
 
       resources {
         cpu_idle = true
@@ -107,7 +107,7 @@ resource "google_cloud_run_v2_service" "metrics" {
     timeout                          = "300s"
 
     containers {
-      image = "asia-northeast1-docker.pkg.dev/wasm-c-web/gcr/metrics:latest"
+      image = var.metrics_image_url
 
       resources {
         cpu_idle = true

@@ -18,7 +18,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud iam service-accounts keys create key.json \
   --iam-account "$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 
-bash deploy.sh
+bash image-push-to-gar.sh
 
 terraform init
 terraform apply

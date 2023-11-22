@@ -46,7 +46,7 @@ const build = async () => {
   });
 
   server.post("/", async (request, reply) => {
-    reply.send("OK");
+    reply.send({ status: "OK" });
   });
 
   return server;

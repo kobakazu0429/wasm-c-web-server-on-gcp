@@ -57,7 +57,8 @@ const compileToWasm = async (src) => {
 
   await pExec(`wasm-opt --asyncify ${wasmFilePath} -o ${asyncWasmFilePath}`);
 
-  return { compileLog, binary: fs.readFile(asyncWasmFilePath) };
+  const binary = await fs.readFile(asyncWasmFilePath);
+  return { compileLog, binary };
 };
 
 const build = async () => {
@@ -65,7 +66,6 @@ const build = async () => {
     logger: {
       serializers: {
         res(reply) {
-          // console.log(reply);
           return {
             statusCode: reply.statusCode,
             req: {
@@ -100,14 +100,14 @@ const build = async () => {
     const { src } = request.body;
     try {
       const { compileLog, binary } = await compileToWasm(src);
-      // request.log.info({ src, binarySize: binary.length });
+      // request.log.info({ src, compileLog, binarySize: binary.length });
       reply.send({
         code: CODE.OK,
         binary,
         compileLog,
       });
     } catch (error) {
-      request.log.error(error);
+      request.log.error({ src, error });
       const message = error.stderr;
 
       reply.send({

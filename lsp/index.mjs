@@ -5,28 +5,6 @@ import * as rpc from "vscode-ws-jsonrpc";
 import * as server from "vscode-ws-jsonrpc/server";
 import * as lsp from "vscode-languageserver";
 import url from "node:url";
-import cp from "node:child_process";
-
-// from: vscode-ws-jsonrpc/server
-function createServerProcess(serverName, command, args, options, traceId) {
-  const serverProcess = cp.spawn(command, args || [], options || {});
-  serverProcess.on("error", (error) =>
-    console.error(`Launching Server failed: ${error}`)
-  );
-  if (serverProcess.stderr !== null) {
-    serverProcess.stderr.on("data", (data) => {
-      console.log(
-        JSON.stringify({
-          lspLog: data.toString(),
-          "logging.googleapis.com/trace": traceId
-            ? `projects/wasm-c-web/traces/${traceId}`
-            : undefined,
-        })
-      );
-    });
-  }
-  return server.createProcessStreamConnection(serverProcess);
-}
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception: ", err.toString());
@@ -47,12 +25,12 @@ const launch = (socket, traceId) => {
     socket.dispose();
   });
 
-  const serverConnection = createServerProcess(
+  const serverConnection = server.createServerProcess(
     "c",
     CLANGD,
-    ["--log=verbose", "--pretty"],
-    {},
-    traceId
+    // ["--log=verbose", "--pretty"],
+    [],
+    {}
   );
   if (!serverConnection) {
     throw new Error("serverConnection is undefined.");
@@ -60,6 +38,14 @@ const launch = (socket, traceId) => {
 
   server.forward(socketConnection, serverConnection, (message) => {
     // console.log("message:", message);
+    console.log(
+      JSON.stringify({
+        message,
+        "logging.googleapis.com/trace": traceId
+          ? `projects/wasm-c-web/traces/${traceId}`
+          : undefined,
+      })
+    );
 
     if (lsp.Message.isRequest(message)) {
       if (message.method === lsp.InitializeRequest.type.method) {

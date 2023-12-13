@@ -17,7 +17,7 @@ const CLANGD = process.env.CLANGD;
 if (!CLANGD) throw new Error("CLANGD not set");
 
 /** @type {(socket: rpc.IWebSocket) => void} */
-const launch = (socket, traceId) => {
+const launch = (socket, traceId, userId) => {
   const reader = new rpc.WebSocketMessageReader(socket);
   const writer = new rpc.WebSocketMessageWriter(socket);
 
@@ -41,6 +41,7 @@ const launch = (socket, traceId) => {
     console.log(
       JSON.stringify({
         message,
+        userId,
         "logging.googleapis.com/trace": traceId
           ? `projects/wasm-c-web/traces/${traceId}`
           : undefined,
@@ -78,6 +79,7 @@ const build = async () => {
       const trace = req.headers["x-cloud-trace-context"];
       const [, traceId, _spanId, _traceTrue] =
         /([a-f0-9]+)\/([a-f0-9]+);o=(0|1)/.exec(trace ?? "") ?? [];
+      const userId = req.query.userId;
 
       /** @type {rpc.IWebSocket} */
       const socket = {
@@ -112,10 +114,10 @@ const build = async () => {
       if (connection.socket.readyState === connection.socket.OPEN) {
         // console.log("readyState: ", connection.socket.readyState);
         // console.log("connection.socket.OPEN:", connection.socket.OPEN);
-        launch(socket, traceId);
+        launch(socket, traceId, userId);
       } else {
         // console.log("readyState: ", connection.socket.readyState);
-        connection.socket.on("open", () => launch(socket, traceId));
+        connection.socket.on("open", () => launch(socket, traceId), userId);
       }
     },
   });

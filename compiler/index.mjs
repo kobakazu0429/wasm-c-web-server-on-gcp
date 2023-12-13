@@ -68,9 +68,7 @@ const build = async () => {
         res(reply) {
           return {
             statusCode: reply.statusCode,
-            req: {
-              body: reply.request.body,
-            },
+            req: reply.request,
           };
         },
         req(request) {
